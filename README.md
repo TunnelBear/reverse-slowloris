@@ -35,3 +35,10 @@ for some handling when no hostname is specified (connecting via IP address)
 
 I don't know if this annoys the bots at all, but I have seen some stay connected
 for over 14 hours.
+
+
+## notes for CloudFlare
+
+- CloudFlare might kill the connection after 100 seconds ([docs](https://support.cloudflare.com/hc/en-us/articles/115003011431-Troubleshooting-Cloudflare-5XX-errors#524error))
+- Or up to 100 minutes if you have enterprise and ([api](https://api.cloudflare.com/#zone-settings-change-proxy-read-timeout-setting)) bump the proxy read timeout. the higher timeout will apply across the entire zone though.
+- (or maybe CF won't time it out since it _is_ sending response bytes the whole time?)

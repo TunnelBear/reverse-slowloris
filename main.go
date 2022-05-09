@@ -14,13 +14,12 @@ import (
 	"github.com/alecthomas/kong"
 )
 
-const headers = `HTTP/1.x 200 OK
-Cache-Control: no-cache
-Transfer-Encoding: chunked
-Content-Type: text/plain; charset=iso-8859-1
-X-Content-Type-Options: nosniff
-
-`
+const headers = "HTTP/1.1 200 OK\r\n" +
+	"Cache-Control: no-cache\r\n" +
+	"Transfer-Encoding: chunked\r\n" +
+	"Content-Type: text/plain; charset=iso-8859-1\r\n" +
+	"X-Content-Type-Options: nosniff\r\n" +
+	"\r\n"
 
 const port = ":6969"
 
@@ -40,6 +39,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to load %s: %s", cli.Payload, err)
 	}
+	chunk := []byte(fmt.Sprintf("%x\r\n%s\r\n", len(payload), payload))
 
 	log.Printf("Starting server on port %s", cli.Port)
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", cli.Port))
@@ -56,16 +56,16 @@ func main() {
 			log.Fatalf("Error accepting: ", err.Error())
 		}
 		// Handle connections in a new goroutine.
-		go handleRequest(conn, requestNum, payload)
+		go handleRequest(conn, requestNum, chunk)
 		requestNum++
 	}
 }
 
 func getProbableRemoteIP(request *http.Request, conn net.Conn) string {
-	// Hopefully this is set if there is a proxy like nginx in front
-	requester := request.Header.Get("X-Forwarded-For")
+	// won't follow back through our proxies in front of CF
+	requester := request.Header.Get("CF-Connecting-IP")
 	if requester == "" {
-		requester = conn.RemoteAddr().String()
+		requester = fmt.Sprintf("%s [CF bypassed]", conn.RemoteAddr().String())
 	}
 	return requester
 }
