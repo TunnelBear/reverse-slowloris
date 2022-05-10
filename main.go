@@ -21,10 +21,9 @@ const headers = "HTTP/1.1 200 OK\r\n" +
 	"X-Content-Type-Options: nosniff\r\n" +
 	"\r\n"
 
-const port = ":6969"
-
 var cli struct {
 	Payload string `arg name:"payload" help:"content to send as a response." type:"string"`
+	Host    string `arg name:"host" help:"host to listen to." type:"string" default:0.0.0.0 optional`
 	Port    string `arg name:"port" help:"port to bind to." type:"int" default:8080 optional`
 }
 
@@ -41,8 +40,8 @@ func main() {
 	}
 	chunk := []byte(fmt.Sprintf("%x\r\n%s\r\n", len(payload), payload))
 
-	log.Printf("Starting server on port %s", cli.Port)
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", cli.Port))
+	log.Printf("Starting server at %s:%s", cli.Host, cli.Port)
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%s", cli.Host, cli.Port))
 	if err != nil {
 		log.Fatalf("Failed to start server :%s", err)
 	}
