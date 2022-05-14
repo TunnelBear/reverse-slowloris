@@ -102,20 +102,12 @@ func handleRequest(conn net.Conn, requestNum int, payload []byte) {
 		parsedRequest.URL.RequestURI(),
 		parsedRequest.Header.Get("User-Agent"),
 	)
-	keepGoing := true
 	for {
-		if !keepGoing {
+		_, err := conn.Write(payload)
+		if err != nil {  // A failure here is expected because it is the only way out of this infinite response
 			break
 		}
-		for _, char := range payload {
-			_, err := conn.Write([]byte{uint8(char)})
-			// A failure here is expected because it is the only way out of this infinite response
-			if err != nil {
-				keepGoing = false
-				break
-			}
-			time.Sleep(300 * time.Millisecond)
-		}
+		time.Sleep(300 * time.Millisecond)
 	}
 	elapsed := time.Since(started).Round(time.Second)
 	log.Printf("%d | %s closed their connection after %s\n", requestNum, requester, elapsed)
