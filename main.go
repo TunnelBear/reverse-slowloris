@@ -96,10 +96,11 @@ func handleRequest(conn net.Conn, requestNum int, payload []byte) {
 	conn.Write([]byte(headers))
 
 	log.Printf(
-		"%d | %s connected asking for %s, starting to stream response\n",
+		"%d | %s | connected | %s | %s\n",
 		requestNum,
 		requester,
 		parsedRequest.URL.RequestURI(),
+		parsedRequest.Header.Get("User-Agent"),
 	)
 	keepGoing := true
 	for {
@@ -113,11 +114,7 @@ func handleRequest(conn net.Conn, requestNum int, payload []byte) {
 				keepGoing = false
 				break
 			}
-			time.Sleep(75 * time.Millisecond)
-		}
-		if keepGoing {
-			elapsed := time.Since(started).Round(time.Second)
-			log.Printf("%d | %s Has been streaming for %s\n", requestNum, requester, elapsed)
+			time.Sleep(300 * time.Millisecond)
 		}
 	}
 	elapsed := time.Since(started).Round(time.Second)
